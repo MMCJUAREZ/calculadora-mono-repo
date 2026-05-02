@@ -50,4 +50,4 @@ Dos flujos separados:
 
 En Kubernetes, Promtail/Fluentd los recolecta automáticamente desde stdout del pod.
 
-# TestJL
+# Test

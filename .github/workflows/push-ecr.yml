@@ -70,4 +70,4 @@ jobs:
           docker push $ECR_REGISTRY/ulises-calculadora-frontend:latest
           echo "Pushed frontend:$SHA"
 
-#Prueba 1
+#Prueba
