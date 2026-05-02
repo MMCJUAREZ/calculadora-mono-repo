@@ -12,8 +12,8 @@ permissions:
   contents: read
  
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-  ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
  
 jobs:
   build-and-push-backend:
@@ -26,8 +26,8 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
  
       - name: Login to Amazon ECR
         id: ecr-login
@@ -53,8 +53,8 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
  
       - name: Login to Amazon ECR
         id: ecr-login
