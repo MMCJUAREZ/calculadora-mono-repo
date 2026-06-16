@@ -1,72 +1,12 @@
-Resumen del Repositorio 'calculadora-mono-repo'
+# Borrar repositorio Backend
+aws ecr delete-repository --repository-name ulises-calculadora-backend --force
 
-Este resumen describe el propósito y contenido de los archivos clave en el repositorio.
+# Borrar repositorio Frontend
+aws ecr delete-repository --repository-name ulises-calculadora-frontend --force
 
----
-### Archivos de Configuración y Documentación (Raíz)
----
+# 1. Quitar la política de ECR del rol
+aws iam detach-role-policy --role-name github-actions-calculadora-rol --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
 
-*   `README.md`:
-    *   **Propósito**: Documentación principal del proyecto.
-    *   **Contenido**: Describe la estructura del monorepo (backend, frontend, infra, k8s), instrucciones de inicio rápido con `docker compose`, una tabla con los endpoints de la API, comandos de despliegue en Kubernetes y los dueños del código (`CODEOWNERS`).
+# 2. Borrar el rol
+aws iam delete-role --role-name github-actions-calculadora-rol
 
-*   `docker-compose.yml`:
-    *   **Propósito**: Orquestar los contenedores de `frontend` y `backend` para el desarrollo local.
-    *   **Contenido**: Define dos servicios:
-        1.  `backend`: Construye la imagen desde `./backend`, expone el puerto 8000 internamente y define variables de entorno para desarrollo. Incluye un `healthcheck` que verifica el endpoint `/api/health`.
-        2.  `frontend`: Construye la imagen desde `./frontend`, mapea el puerto 80 del contenedor al 80 del host, y depende del estado saludable (`service_healthy`) del servicio `backend`.
-
----
-### Backend (API con FastAPI)
----
-
-*   `backend/README.md`:
-    *   **Propósito**: Documentación específica del servicio de backend.
-    *   **Contenido**: Detalla el stack tecnológico (Python/FastAPI), la lista de endpoints, las variables de entorno requeridas (`ENVIRONMENT`, `ALLOWED_ORIGINS`, `LOG_LEVEL`), y cómo ejecutarlo localmente (con y sin Docker).
-
-*   `backend/main.py`:
-    *   **Propósito**: Corazón de la API de la calculadora.
-    *   **Contenido**:
-        *   **Configuración**: Carga la configuración (entorno, orígenes CORS, nivel de log) desde variables de entorno.
-        *   **Logging**: Implementa un sistema de logging estructurado en JSON para dos canales: `tecnico` (errores, latencia) y `auditoria` (qué operación se hizo y quién la hizo).
-        *   **CORS**: Configura el middleware de CORS para permitir peticiones desde orígenes específicos según el entorno (`*` en `dev`).
-        *   **Endpoints**: Define las rutas de la API:
-            *   `/health`: Un chequeo de salud básico.
-            *   `/sumar`, `/restar` (GET): Operaciones que reciben parámetros por query string.
-            *   `/multiplicar`, `/dividir` (POST): Operaciones que reciben un cuerpo JSON. Incluye validación para evitar la división por cero.
-        *   **Observabilidad**: Cada endpoint genera logs técnicos y de auditoría con un ID de petición (`request_id`) único.
-
----
-### Frontend (UI con HTML/CSS/JS)
----
-
-*   `frontend/app.js`:
-    *   **Propósito**: Lógica de la interfaz de usuario de la calculadora.
-    *   **Contenido**:
-        *   Define funciones para obtener los valores de los inputs.
-        *   Realiza llamadas `fetch` a la API del backend (`/api/...`) para cada operación (sumar, restar, multiplicar, dividir).
-        *   Maneja las respuestas (exitosas y de error) y las muestra en la interfaz.
-        *   Implementa una función `checkHealth` que se ejecuta al cargar la página para verificar el estado de la API y mostrarlo visualmente.
-
-*   `frontend/app.css`:
-    *   **Propósito**: Estilos visuales para la aplicación de la calculadora.
-    *   **Contenido**: Define el diseño, colores, fuentes y apariencia de los elementos de la página, como el contenedor principal, las tarjetas, los formularios, los botones y los mensajes de salida.
-
----
-### Integración Continua (GitHub Actions)
----
-
-*   `.github/workflows/backend-ci.yml`:
-    *   **Propósito**: Workflow de CI (Integración Continua) para el backend.
-    *   **Contenido**: Se activa con cambios en la carpeta `backend/`. Instala dependencias de Python y ejecuta una prueba simple: levanta el servidor de FastAPI y verifica que el endpoint `/api/health` responda correctamente.
-
-*   `.github/workflows/frontend-ci.yml`:
-    *   **Propósito**: Workflow de CI para el frontend.
-    *   **Contenido**: Se activa con cambios en la carpeta `frontend/`. Construye la imagen Docker del frontend y la ejecuta para verificar que el servidor Nginx inicie sin errores.
-
-*   `.github/workflows/push-ecr.yml`:
-    *   **Propósito**: Workflow de CD (Despliegue Continuo) para construir y publicar las imágenes en el registro de contenedores de AWS (ECR).
-    *   **Contenido**:
-        *   Se activa con pushes a la rama `main` que afecten a `backend/` o `frontend/`.
-        *   Tiene dos jobs paralelos: uno para el backend y otro para el frontend.
-        *   Cada job se autentica en AWS usando OIDC, construye la imagen Docker correspondiente, la etiqueta con el hash del commit y con `latest`, y la sube a Amazon ECR.
