@@ -3,15 +3,17 @@ name: Build and Push to ECR
 on:
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
+    # Comentamos temporalmente paths para que se ejecute con tus cambios actuales de infra
+    # paths:
+    #   - "backend/**"
+    #   - "frontend/**"
  
 permissions:
   id-token: write
   contents: read
  
 env:
+  # Ajusta a 'vars' si los guardaste como Variables en lugar de Secrets en GitHub
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
  
@@ -37,10 +39,11 @@ jobs:
         working-directory: backend
         run: |
           SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          docker build -t $ECR_REGISTRY/ulises-calculadora-backend:$SHA \
-                       -t $ECR_REGISTRY/ulises-calculadora-backend:latest .
-          docker push $ECR_REGISTRY/ulises-calculadora-backend:$SHA
-          docker push $ECR_REGISTRY/ulises-calculadora-backend:latest
+          # CORREGIDO: Se cambiaron los nombres para que coincidan EXACTAMENTE con Terraform
+          docker build -t $ECR_REGISTRY/ulises-backend:$SHA \
+                       -t $ECR_REGISTRY/ulises-backend:latest .
+          docker push $ECR_REGISTRY/ulises-backend:$SHA
+          docker push $ECR_REGISTRY/ulises-backend:latest
           echo "Pushed backend:$SHA"
  
   build-and-push-frontend:
@@ -64,10 +67,9 @@ jobs:
         working-directory: frontend
         run: |
           SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          docker build -t $ECR_REGISTRY/ulises-calculadora-frontend:$SHA \
-                       -t $ECR_REGISTRY/ulises-calculadora-frontend:latest .
-          docker push $ECR_REGISTRY/ulises-calculadora-frontend:$SHA
-          docker push $ECR_REGISTRY/ulises-calculadora-frontend:latest
+          # CORREGIDO: Se cambiaron los nombres para que coincidan EXACTAMENTE con Terraform
+          docker build -t $ECR_REGISTRY/ulises-frontend:$SHA \
+                       -t $ECR_REGISTRY/ulises-frontend:latest .
+          docker push $ECR_REGISTRY/ulises-frontend:$SHA
+          docker push $ECR_REGISTRY/ulises-frontend:latest
           echo "Pushed frontend:$SHA"
-
-#Prueba
