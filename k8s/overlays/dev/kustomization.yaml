@@ -12,3 +12,11 @@ configMapGenerator:
       - ENVIRONMENT=dev
       - ALLOWED_ORIGINS=*
       - LOG_LEVEL=debug
+
+images:
+  - name: ACCOUNT.dkr.ecr.REGION.amazonaws.com/backend:latest
+    newName: 157611948522.dkr.ecr.us-east-1.amazonaws.com/ulises-backend
+    newTag: latest
+  - name: ACCOUNT.dkr.ecr.REGION.amazonaws.com/frontend:latest
+    newName: 157611948522.dkr.ecr.us-east-1.amazonaws.com/ulises-frontend
+    newTag: latest
